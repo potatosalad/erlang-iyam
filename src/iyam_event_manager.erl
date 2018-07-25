@@ -8,7 +8,7 @@
 %%% @end
 %%% Created :  24 Jul 2018 by Andrew Bennett <potatosaladx@gmail.com>
 %%%-------------------------------------------------------------------
--module(zcsd_event_manager).
+-module(iyam_event_manager).
 
 %% API
 -export([start_link/0]).

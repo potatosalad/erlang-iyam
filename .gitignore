@@ -17,4 +17,4 @@ _build
 *.iml
 rebar3.crashdump
 /.erlang.mk
-/zcsd.d
+/iyam.d

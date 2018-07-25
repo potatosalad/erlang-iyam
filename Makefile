@@ -1,5 +1,5 @@
-PROJECT = zcsd
-# PROJECT_DESCRIPTION = Generic consistent hash algorithm handler for rings.
-# PROJECT_VERSION = 1.0.0
+PROJECT = iyam
+PROJECT_DESCRIPTION = "I Yam What I Yam" - Zero Configuration Service Discovery
+PROJECT_VERSION = 0.0.1
 
 include erlang.mk

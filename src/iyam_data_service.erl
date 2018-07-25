@@ -8,7 +8,7 @@
 %%% @end
 %%% Created :  24 Jul 2018 by Andrew Bennett <potatosaladx@gmail.com>
 %%%-------------------------------------------------------------------
--module(zcsd_data_service).
+-module(iyam_data_service).
 
 %% Types
 -type domain() :: iodata().
@@ -117,7 +117,7 @@ new(Domain, Type, Service, Instance, TTL, Priority, Weight, Port, Target, Data) 
 
 -spec to_dns_record(t()) -> term().
 to_dns_record(DNS = #{'__struct__' := ?MODULE, domain := D, type := T, service := S, instance := I}) ->
-	#{'PTR' := PTR, 'SRV' := SRV} = zcsd_name:key_encode({D, T, S, I}),
+	#{'PTR' := PTR, 'SRV' := SRV} = iyam_name:key_encode({D, T, S, I}),
 	inet_dns:make_msg([
 		{header, inet_dns_header()},
 		{anlist, inet_dns_anlist(PTR, SRV, DNS)},
@@ -149,17 +149,17 @@ from_dns_record(Record) ->
 			SRV = proplists:get_value(domain, Text),
 			TTL = proplists:get_value(ttl, Text),
 			TXTData = inet_dns_txt_data_decode(proplists:get_value(data, Text)),
-			PTRx = zcsd_util:any_to_bitstring(PTR),
-			SRVx = zcsd_util:any_to_bitstring(SRV),
+			PTRx = iyam_util:any_to_bitstring(PTR),
+			SRVx = iyam_util:any_to_bitstring(SRV),
 			Encoded = binary:part(SRVx, 0, byte_size(SRVx) - byte_size(PTRx) - 1),
-			KEYx = << (zcsd_name:reverse(PTRx))/binary, $., Encoded/binary >>,
+			KEYx = << (iyam_name:reverse(PTRx))/binary, $., Encoded/binary >>,
 			Arg = #{
 				'PTR' => PTRx,
 				'SRV' => SRVx,
 				'KEY' => KEYx
 			},
-			{RDomain, RType, RService, RInstance} = zcsd_name:key_decode(Arg),
-			new(RDomain, RType, RService, RInstance, TTL, Priority, Weight, Port, zcsd_util:any_to_bitstring(Target), TXTData);
+			{RDomain, RType, RService, RInstance} = iyam_name:key_decode(Arg),
+			new(RDomain, RType, RService, RInstance, TTL, Priority, Weight, Port, iyam_util:any_to_bitstring(Target), TXTData);
 		_ ->
 			erlang:error(badarg, [Record])
 	end.
@@ -211,10 +211,10 @@ inet_dns_anlist(PTR, SRV, DNS) ->
 inet_dns_ptr(PTR, SRV, #{'__struct__' := ?MODULE, ttl := TTL}) ->
 	inet_dns:make_rr([
 		{type, ptr},
-		{domain, zcsd_util:any_to_charlist(PTR)},
+		{domain, iyam_util:any_to_charlist(PTR)},
 		{class, in},
 		{ttl, TTL},
-		{data, zcsd_util:any_to_charlist(SRV)}
+		{data, iyam_util:any_to_charlist(SRV)}
 	]).
 
 %% @private
@@ -225,17 +225,17 @@ inet_dns_arlist(SRV, DNS) ->
 inet_dns_srv(SRV, #{'__struct__' := ?MODULE, ttl := TTL, priority := Priority, weight := Weight, port := Port, target := Target}) ->
 	inet_dns:make_rr([
 		{type, srv},
-		{domain, zcsd_util:any_to_charlist(SRV)},
+		{domain, iyam_util:any_to_charlist(SRV)},
 		{class, in},
 		{ttl, TTL},
-		{data, {Priority, Weight, Port, zcsd_util:any_to_charlist(Target)}}
+		{data, {Priority, Weight, Port, iyam_util:any_to_charlist(Target)}}
 	]).
 
 %% @private
 inet_dns_txt(SRV, DNS = #{'__struct__' := ?MODULE, ttl := TTL}) ->
 	inet_dns:make_rr([
 		{type, txt},
-		{domain, zcsd_util:any_to_charlist(SRV)},
+		{domain, iyam_util:any_to_charlist(SRV)},
 		{class, in},
 		{ttl, TTL},
 		{data, inet_dns_txt_data_encode(DNS)}
@@ -244,12 +244,12 @@ inet_dns_txt(SRV, DNS = #{'__struct__' := ?MODULE, ttl := TTL}) ->
 %% @private
 inet_dns_txt_data_encode(#{'__struct__' := ?MODULE, data := Data}) ->
 	[begin
-		zcsd_util:any_to_charlist([zcsd_rfc3986:urlencode(Key), $=, zcsd_rfc3986:urlencode(Val)])
+		iyam_util:any_to_charlist([iyam_rfc3986:urlencode(Key), $=, iyam_rfc3986:urlencode(Val)])
 	end || {Key, Val} <- Data].
 
 %% @private
 inet_dns_txt_data_decode(Data) ->
 	[begin
-		[Key, Val] = binary:split(zcsd_util:any_to_bitstring(KeyVal), <<"=">>),
-		{zcsd_rfc3986:urldecode(Key), zcsd_rfc3986:urldecode(Val)}
+		[Key, Val] = binary:split(iyam_util:any_to_bitstring(KeyVal), <<"=">>),
+		{iyam_rfc3986:urldecode(Key), iyam_rfc3986:urldecode(Val)}
 	end || KeyVal <- Data].

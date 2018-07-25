@@ -1,7 +1,7 @@
-zcsd
+iyam
 =====
 
-Zero Configuration Service Discovery
+"I Yam What I Yam" - Zero Configuration Service Discovery
 
 Build
 -----

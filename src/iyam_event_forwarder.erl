@@ -8,7 +8,7 @@
 %%% @end
 %%% Created :  23 Jul 2018 by Andrew Bennett <potatosaladx@gmail.com>
 %%%-------------------------------------------------------------------
--module(zcsd_event_forwarder).
+-module(iyam_event_forwarder).
 -behaviour(gen_event).
 
 %% gen_event callbacks
@@ -37,7 +37,7 @@ handle_call(_Request, State) ->
 
 %% @private
 handle_event(Event, State = {_Ref, Pid}) ->
-	catch Pid ! {'$zcsd', Event},
+	catch Pid ! {'$iyam', Event},
 	{ok, State}.
 
 %% @private

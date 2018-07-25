@@ -8,33 +8,43 @@
 %%% @end
 %%% Created :  24 Jul 2018 by Andrew Bennett <potatosaladx@gmail.com>
 %%%-------------------------------------------------------------------
--module(zcsd_util).
+-module(iyam_sup).
+-behaviour(supervisor).
 
 %% API
--export([any_to_bitstring/1]).
--export([any_to_charlist/1]).
+-export([start_link/0]).
+
+%% supervisor callbacks
+-export([init/1]).
 
 %%%===================================================================
 %%% API functions
 %%%===================================================================
 
-%% @doc Converts many common terms to a binary.
--spec any_to_bitstring(integer() | binary() | atom() | iodata()) -> binary().
-any_to_bitstring(B) when is_binary(B) ->
-	B;
-any_to_bitstring(T) ->
-	erlang:iolist_to_binary(any_to_charlist(T)).
+start_link() ->
+	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%% @doc Converts many common terms to a charlist.
--spec any_to_charlist(integer() | binary() | atom() | iodata()) -> string().
-any_to_charlist(I) when is_integer(I) ->
-	erlang:integer_to_list(I);
-any_to_charlist(B) when is_binary(B) ->
-	erlang:binary_to_list(B);
-any_to_charlist(A) when is_atom(A) ->
-	erlang:atom_to_list(A);
-any_to_charlist(L) when is_list(L) ->
-	any_to_charlist(erlang:iolist_to_binary(L)).
+%%%===================================================================
+%%% supervisor callbacks
+%%%===================================================================
+
+init([]) ->
+	ChildSpecs = [
+		#{
+			id => iyam_event_manager,
+			start => {iyam_event_manager, start_link, []},
+			restart => permanent,
+			shutdown => 5000,
+			type => worker,
+			modules => [iyam_event_manager]
+		}
+	],
+	SupFlags = #{
+		strategy => one_for_one,
+		intensity => 1,
+		period => 5
+	},
+	{ok, {SupFlags, ChildSpecs}}.
 
 %%%-------------------------------------------------------------------
 %%% Internal functions

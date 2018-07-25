@@ -8,7 +8,7 @@
 %%% @end
 %%% Created :  24 Jul 2018 by Andrew Bennett <potatosaladx@gmail.com>
 %%%-------------------------------------------------------------------
--module(zcsd_name).
+-module(iyam_name).
 
 %% API
 -export([key_decode/1]).
@@ -34,7 +34,7 @@ key_decode(Arg = #{'PTR' := PTR, 'SRV' := SRV, 'KEY' := KEY})
 		andalso byte_size(PTR) < byte_size(SRV)
 		andalso << $., PTR/binary >> =:= binary_part(SRV, byte_size(SRV) - byte_size(PTR) - 1, byte_size(PTR) + 1) ->
 	Encoded = binary:part(SRV, 0, byte_size(SRV) - byte_size(PTR) - 1),
-	Instance = zcsd_rfc3986:urldecode(Encoded),
+	Instance = iyam_rfc3986:urldecode(Encoded),
 	case split(PTR) of
 		[<< $_, Service/binary >>, << $_, Type/binary >> | DomainLabels] ->
 			Domain = join(DomainLabels),
@@ -53,7 +53,7 @@ key_encode({Domain, Type, Service, Instance})
 		andalso is_binary(Instance) ->
 	case lists:all(fun is_valid_label/1, [Service, Type | split(Domain)]) of
 		true ->
-			Encoded = zcsd_rfc3986:urlencode(Instance),
+			Encoded = iyam_rfc3986:urlencode(Instance),
 			PTR = join([<< $_, Service/binary >>, << $_, Type/binary >>, Domain]),
 			SRV = << Encoded/binary, $., PTR/binary >>,
 			KEY = << (reverse(PTR))/binary, $., Encoded/binary >>,
